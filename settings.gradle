@@ -1,0 +1,3 @@
+rootProject.name = 'contenttype'
+
+include 'client', 'server'
