@@ -1,0 +1,4 @@
+dependencies {
+    compile "com.mangofactory:swagger-springmvc:1.0.1"
+    compile "org.ajar:swagger-spring-mvc-ui:0.4"
+}
