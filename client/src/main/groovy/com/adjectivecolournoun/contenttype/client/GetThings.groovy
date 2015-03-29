@@ -1,6 +1,5 @@
 package com.adjectivecolournoun.contenttype.client
 
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpRequest
 import org.springframework.http.MediaType
 import org.springframework.http.client.ClientHttpRequestExecution
@@ -9,12 +8,16 @@ import org.springframework.http.client.ClientHttpResponse
 import org.springframework.http.client.support.HttpRequestWrapper
 import org.springframework.web.client.RestTemplate
 
+def thingEndpoint = 'http://localhost:8080/thing'
+
 def template = new RestTemplate()
 
-def versionZero = MediaType.parseMediaType('application/vnd.acn.thing+json')
-def versionOne = MediaType.parseMediaType('application/vnd.acn.thing-v1+json')
-def versionTwo = MediaType.parseMediaType('application/vnd.acn.thing-v2+json')
-def versionThree = MediaType.parseMediaType('application/vnd.acn.thing-v3+json')
+def versionZero = MediaType.parseMediaType('application/vnd.acn.thing+json;charset=UTF-8')
+def versionOne = MediaType.parseMediaType('application/vnd.acn.thing-v1+json;charset=UTF-8')
+def versionTwo = MediaType.parseMediaType('application/vnd.acn.thing-v2+json;charset=UTF-8')
+def versionThree = MediaType.parseMediaType('application/vnd.acn.thing-v3+json;charset=UTF-8')
+
+def thingIds = template.getForEntity(thingEndpoint, Map).body.things*.id
 
 [
         'application/vnd.acn.thing+json',
@@ -23,14 +26,17 @@ def versionThree = MediaType.parseMediaType('application/vnd.acn.thing-v3+json')
     def contentTypeInterceptor = new AcceptHeaderHttpRequestInterceptor(contentType)
     template.interceptors = [contentTypeInterceptor]
 
-    def response = template.getForEntity('http://localhost:8080/thing', Map)
-    def thing = new Thing(response.body)
-    println "Got content type ${response.headers.getContentType()}"
-    switch (response.headers.getContentType()) {
-        case versionZero  :
-        case versionOne   : handleVersionOne(thing); break
-        case versionTwo   : handleVersionTwo(thing); break
-        case versionThree : handleVersionThree(thing); break
+    thingIds.each { id ->
+        def response = template.getForEntity("$thingEndpoint/$id", Map)
+        def thing = new Thing(response.body)
+        def type = response.headers.getContentType()
+        println "Got content type $type"
+        switch (type) {
+            case versionZero:
+            case versionOne: handleVersionOne(thing); break
+            case versionTwo: handleVersionTwo(thing); break
+            case versionThree: handleVersionThree(thing); break
+        }
     }
 }
 

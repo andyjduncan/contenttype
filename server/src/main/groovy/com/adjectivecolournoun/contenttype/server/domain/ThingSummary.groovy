@@ -1,9 +1,9 @@
 package com.adjectivecolournoun.contenttype.server.domain
 
-import groovy.transform.Canonical
+import groovy.transform.Immutable
 
-@Canonical
-abstract class Thing {
+@Immutable
+class ThingSummary {
 
     String id
 

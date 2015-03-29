@@ -1,6 +1,9 @@
 package com.adjectivecolournoun.contenttype.server.domain
 
-class ThingTwo extends Thing {
+import groovy.transform.Canonical
+
+@Canonical
+class ThingTwo extends ThingOne {
 
     String type
 }

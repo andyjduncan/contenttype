@@ -1,9 +1,10 @@
 package com.adjectivecolournoun.contenttype.server.controllers
 
-import com.adjectivecolournoun.contenttype.server.domain.Thing
-import com.adjectivecolournoun.contenttype.server.domain.ThingThree
-import com.adjectivecolournoun.contenttype.server.domain.ThingTwo
+import com.adjectivecolournoun.contenttype.server.domain.*
+import com.adjectivecolournoun.contenttype.server.service.ThingService
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RestController
@@ -13,21 +14,33 @@ import org.springframework.web.bind.annotation.RestController
 @Slf4j
 class ThingController {
 
-    @RequestMapping(produces = ['application/vnd.acn.thing+json', 'application/vnd.acn.thing-v1+json'])
-    Thing versionOne() {
+    @Autowired
+    ThingService thingService
+
+    @RequestMapping
+    ThingSummaryList list() {
+        def summaryList = thingService.allThings().collect {
+            new ThingSummary(it.id, it.name)
+        }
+
+        new ThingSummaryList(summaryList)
+    }
+
+    @RequestMapping(value = '/{thingId}', produces = ['application/vnd.acn.thing+json', 'application/vnd.acn.thing-v1+json'])
+    ThingOne versionOne(@PathVariable String thingId) {
         log.info 'Producing version 1 thing'
-        new Thing(name: 'first thing')
+        thingService.loadAsVersionOne thingId
     }
 
-    @RequestMapping(produces = 'application/vnd.acn.thing-v2+json')
-    ThingTwo versionTwo() {
+    @RequestMapping(value = '/{thingId}', produces = 'application/vnd.acn.thing-v2+json')
+    ThingTwo versionTwo(@PathVariable String thingId) {
         log.info 'Producing version 2 thing'
-        new ThingTwo(name: 'second thing', type: 'a thing')
+        thingService.loadAsVersionTwo thingId
     }
 
-//    @RequestMapping(produces = 'application/vnd.acn.thing-v3+json')
-//    ThingThree versionThree() {
-//        log.info 'Producing version 3 thing'
-//        new ThingThree(name: 'third thing', type: 'a thing', count: 123)
-//    }
+//    @RequestMapping(value = '/{thingId}', produces = 'application/vnd.acn.thing-v3+json')
+    ThingThree versionThree(@PathVariable String thingId) {
+        log.info 'Producing version 3 thing'
+        thingService.loadAsVersionThree thingId
+    }
 }
